@@ -1,11 +1,12 @@
 import { fDb } from '../middleware/firebase';
-import { hash } from "../middleware/security";
+import { hash, hashSecure } from '../middleware/security';
+import User from './user';
 
 
 
 interface IBlog {
     content: string;
-    author: string;
+    author: string | any;
     likes: number;
     comment: number;
     views: number;
@@ -14,6 +15,9 @@ interface IBlog {
     timestamp: number;
 }
 
+interface IPost extends IBlog {
+    author: { name: string, handle: string, profileImg: string };
+}
 
 export default class Blog {
 
@@ -38,7 +42,7 @@ export default class Blog {
         }
 
 
-        const authorDocId = hash(post.author, "md5");
+        const authorDocId = hashSecure(post.author, "md5");
 
         const batch = fDb.batch();
 
@@ -55,12 +59,19 @@ export default class Blog {
     }
 
 
-    static async list({ limit = 10 }): Promise<Array<IBlog>> {
+    static async list({ limit = 10 }): Promise<Array<IPost>> {
 
         const postDocs = await fDb.collection("posts").orderBy("timestamp", "desc").limit(limit || 10).get();
-        return postDocs.docs.map((doc) => doc.data() as IBlog);
+        const postData = postDocs.docs.map(e => e.data() as any);
+        const posts: Array<IPost> = [];
+
+        for (const post of postData) {
+            const { firstName, lastName, email, username } = await User.getUser(post.author as any).catch(console.log) as any;
+
+            const image = "https://www.gravatar.com/avatar/" + hash(email.toLowerCase().trim(), "md5") + "?d=identicon";
+            post.author = { name: `${firstName} ${lastName}`, handle: username, profileImg: image }
+            posts.push(post);
+        }
+        return posts
     }
-
-
-
 }

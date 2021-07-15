@@ -1,6 +1,6 @@
 import { BadRequest, NotFound } from "../middleware/error_handler";
 import { fDb } from "../middleware/firebase";
-import { hash } from "../middleware/security";
+import { hashSecure } from "../middleware/security";
 import jwt from "jsonwebtoken";
 import SendMail from "../middleware/mailer";
 // const userDb = new Database("user");
@@ -45,7 +45,7 @@ export default class User {
     }
 
     static generatePassword(username: string, password: string) {
-        return hash(password + username, "sha512");
+        return hashSecure(password + username, "sha512");
     }
 
 
@@ -65,7 +65,7 @@ export default class User {
 
         try {
 
-            const docId = hash(username, 'md5');
+            const docId = hashSecure(username, 'md5');
 
 
             const user = await userColl.doc(docId).get();
@@ -107,7 +107,7 @@ export default class User {
         // await userDb.create(this.username, this.toJson());
         console.log(this.toJson());
 
-        const docId = hash(this.username, "md5");
+        const docId = hashSecure(this.username, "md5");
 
         await userColl.doc(docId).set(this.toJson());
 
