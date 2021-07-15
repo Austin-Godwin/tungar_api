@@ -1,4 +1,4 @@
-import { fDb } from "../middleware/firebase";
+import { fDb } from '../middleware/firebase';
 import { hash } from "../middleware/security";
 
 
@@ -38,23 +38,29 @@ export default class Blog {
         }
 
 
-      const authorDocId =  hash(post.author, "md5");
+        const authorDocId = hash(post.author, "md5");
 
         const batch = fDb.batch();
 
         // general post collection
-        batch.set(fDb.collection('posts').doc(post.id),post);
+        batch.set(fDb.collection('posts').doc(post.id), post);
 
         // user post collection
-        batch.set(fDb.collection('users').doc(authorDocId).collection('posts').doc(post.id),post);
+        batch.set(fDb.collection('users').doc(authorDocId).collection('posts').doc(post.id), post);
 
-       await batch.commit();
-        
-       return post;
+        await batch.commit();
+
+        return post;
 
     }
 
-    
+
+    static async list({ limit = 10 }): Promise<Array<IBlog>> {
+
+        const postDocs = await fDb.collection("posts").orderBy("timestamp", "desc").limit(limit || 10).get();
+        return postDocs.docs.map((doc) => doc.data() as IBlog);
+    }
+
 
 
 }

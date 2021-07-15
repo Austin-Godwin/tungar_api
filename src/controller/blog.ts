@@ -3,7 +3,7 @@ import { SuccessResult } from "../middleware/response";
 import Blog from "../modules/blog";
 
 
-export default class BlogController{
+export default class BlogController {
 
 
 
@@ -13,17 +13,27 @@ export default class BlogController{
 
 
 
-    static async post(req:Request,res:Response){
+    static async post(req: Request, res: Response) {
 
-        const {author,content} = req.body;
+        const { author, content } = req.body;
 
-        const data = await Blog.post({content,author});
+        const data = await Blog.post({ content, author });
 
 
-        return res.status(201).send(SuccessResult("Success",201,data));
+        return res.status(201).send(SuccessResult("Success", 201, data));
 
     }
 
+
+    static async get_posts(req: Request, res: Response) {
+
+        const { limit } = req.params ?? req.query;
+
+        const data = await Blog.list({ limit: Number(limit) });
+
+        return res.status(201).send(SuccessResult("Success", 200, data));
+
+    }
 
 
 

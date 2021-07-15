@@ -8,11 +8,11 @@ const route = Router();
 
 route.use("/user", UserRoute);
 
-route.use(RequestAuth);
+// route.use(RequestAuth);
 
 route.use("/todo", TodoRoute);
 
-route.use("/blog",Blog);
+route.use("/blog", Blog);
 
 
 

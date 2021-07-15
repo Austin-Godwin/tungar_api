@@ -40,7 +40,7 @@ app.use((err: CustomError, req: Request, res: Response, next: NextFunction) => {
 
 
 const PORT = 8081;
-const IP = "172.16.0.49";
+// const IP = "172.16.0.49";
 app.listen(PORT, () => {
 
     console.log(`Server Running At http://127.0.0.1:${PORT}`);
