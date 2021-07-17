@@ -1,8 +1,12 @@
-import { fDb } from '../middleware/firebase';
+import { NotFound } from '../middleware/error_handler';
+import { fDb, FieldValue } from '../middleware/firebase';
 import { hash, hashSecure } from '../middleware/security';
 import User from './user';
 
-
+const postColl = fDb.collection("posts");
+const userColl = fDb.collection("users");
+const likeColl = fDb.collection("likes");
+const viewColl = fDb.collection("views");
 
 interface IBlog {
     content: string;
@@ -22,7 +26,15 @@ interface IPost extends IBlog {
 export default class Blog {
 
 
+    static async getPost(postId: string) {
+        const post = await postColl.doc(postId).get();
 
+        if (!post.exists) {
+            throw new NotFound("No matching post id");
+        }
+
+        return post.data() as IBlog;
+    }
 
 
     static async post({ content, author }: { content: string, author: string }) {
@@ -57,6 +69,53 @@ export default class Blog {
         return post;
 
     }
+
+    static async hasBeenLikedBy(userId: string, postId: string) {
+
+        const like = await likeColl.doc(postId + '_' + userId).get();
+
+        return like.exists;
+    }
+
+
+    static async like(userId: string, postId: string) {
+
+        //! Get the post by the Id
+        const { author } = await Blog.getPost(postId);
+
+        //? Checking if the post has be liked before 
+        const hasBeenLiked = await Blog.hasBeenLikedBy(userId, postId);
+
+        const batch = fDb.batch();
+
+        //* Like Document
+        const likeDoc = { likeBy: userId, post: postId, timestamp: FieldValue.serverTimestamp() };
+
+        //* Post Update Document 
+        const postUpdate = { like: FieldValue.increment(hasBeenLiked ? -1 : 1), lastModified: new Date() };
+
+
+        //* Like Document Id
+        const likeDocId = postId + '_' + userId;
+
+        //? Update main post collection
+        batch.update(postColl.doc(postId), postUpdate);
+
+        //? Update user post collection
+        batch.update(userColl.doc(author).collection('posts').doc(postId), postUpdate);
+
+        //* creating like doc
+        if (hasBeenLiked) {
+            batch.delete(likeColl.doc(likeDocId))
+        } else {
+            batch.set(likeColl.doc(likeDocId), likeDoc);
+        }
+
+        await batch.commit();
+
+    }
+
+
 
 
     static async list({ limit = 10 }): Promise<Array<IPost>> {

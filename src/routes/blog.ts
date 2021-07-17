@@ -7,6 +7,7 @@ const route = Router();
 
 
 route.get("/posts/:limit?", BlogController.get_posts);
+route.patch("/like", BlogController.like);
 route.post("/post", BlogController.post);
 
 
