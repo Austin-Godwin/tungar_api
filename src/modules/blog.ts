@@ -80,7 +80,7 @@ export default class Blog {
 
     static async like(userId: string, postId: string) {
 
-        //! Get the post by the Id
+        //* Get the post by the Id
         const { author } = await Blog.getPost(postId);
 
         //? Checking if the post has be liked before 
@@ -101,8 +101,6 @@ export default class Blog {
         //? Update main post collection
         batch.update(postColl.doc(postId), postUpdate);
 
-        //? Update user post collection
-        batch.update(userColl.doc(author).collection('posts').doc(postId), postUpdate);
 
         //* creating like doc
         if (hasBeenLiked) {
