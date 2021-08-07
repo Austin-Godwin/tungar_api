@@ -22,4 +22,6 @@ export type TDoc<T> = firebase.firestore.DocumentSnapshot<T>;
 //** fDb ~ firestore database 
 export const fDb = firebase.firestore();
 
+export const FieldValue = firebase.firestore.FieldValue;
+
 

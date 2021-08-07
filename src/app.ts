@@ -5,6 +5,7 @@ import morgan from "morgan";
 import { CustomError, NotFound } from "./middleware/error_handler";
 import route from "./routes/index";
 
+const { version } = require("../package.json");
 
 const app = express();
 
@@ -16,7 +17,7 @@ app.use(bodyParser.json());
 
 
 app.get("/", (req: Request, res: Response) => {
-    res.status(200).send({ message: "Welcome To Our API", status: true });
+    res.status(200).send({ message: `Welcome To Our API ${version}`, status: true });
 });
 
 

@@ -38,6 +38,18 @@ export default class BlogController {
 
 
 
+    static async like(req: Request, res: Response) {
+
+        const { postId, userId } = req.body;
+
+        const data = await Blog.like(userId, postId);
+
+        return res.status(201).send(SuccessResult("Success", 200, data));
+    }
+
+
+
+
 
 
 
